@@ -1,0 +1,417 @@
+@import '~ant-design-vue/es/style/themes/default.less';
+
+html,
+body,
+#app,
+#root {
+  height: 100%;
+}
+.ant-pro-global-header-trigger{
+  display: none !important;
+}
+.ant-menu-submenu-arrow{
+  display: none !important;
+}
+.ant-pro-global-header-trigger{
+  // display: none !important;
+}
+.ant-btn-primary:hover{
+  background: #000 !important;
+}
+.ant-btn-primary[disabled]{
+  color: #fff !important;
+}
+.ant-btn.ant-btn-primary:hover, .ant-btn.ant-btn-primary:focus{
+  color: #fff !important;
+  background: #11253e !important;
+}
+.ant-btn.ant-btn-primary:hover{
+    color: #fff !important;
+  background: #11253e !important;
+}
+.ant-pro-global-header-index-right .ant-pro-global-header-index-action{
+  padding-left: 0 !important;
+}
+.ant-card{
+  border: none !important;
+  box-shadow: none !important;
+}
+.ant-card-body{
+
+    padding: 0 !important;
+  margin: 0 !important;
+}
+.trustpay-lang-select{
+  padding-right: 0 !important;
+  min-width: 80px !important;
+}
+
+.ant-menu-submenu-selected .anticon{
+  color: #8A5CFA !important;
+}
+.ant-layout-footer{
+  display: none;
+}
+.ant-breadcrumb{
+  display: none !important;
+}
+.ant-pro-sider-menu-sider.light{
+  box-shadow: none !important;
+}
+.ant-pro-basicLayout .ant-layout-content{
+  background: #fff !important;
+}
+.ant-pro-basicLayout .ant-layout{
+  background: #fff !important;
+}
+.ant-pro-global-header{
+  box-shadow: none !important;
+  border-bottom: 1px solid #EFF1F3 !important;
+}
+.ant-pro-sider-menu-sider.light .ant-pro-sider-menu-logo{
+  background: none !important;
+  box-shadow:none !important;
+}
+
+.colorWeak {
+  filter: invert(80%);
+}
+
+.ant-layout.layout-basic {
+  height: 100vh;
+  min-height: 100vh;
+}
+
+canvas {
+  display: block;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizelegibility;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+// 数据列表 样式
+.table-alert {
+  margin-bottom: 16px;
+}
+// 数据列表 操作
+.table-operator {
+  margin-bottom: 18px;
+
+  button {
+    margin-right: 8px;
+  }
+}
+// 数据列表 搜索条件
+.table-page-search-wrapper {
+  .ant-form-inline {
+    .ant-form-item {
+      display: flex;
+      margin-right: 0;
+      margin-bottom: 24px;
+
+      .ant-form-item-control-wrapper {
+        flex: 1 1;
+        display: inline-block;
+        vertical-align: middle;
+      }
+
+      > .ant-form-item-label {
+        width: auto;
+        padding-right: 8px;
+        line-height: 32px;
+      }
+
+      .ant-form-item-control {
+        height: 32px;
+        line-height: 32px;
+      }
+    }
+  }
+
+  .table-page-search-submitButtons {
+    display: block;
+    margin-bottom: 24px;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: @screen-xs) {
+  .ant-table {
+    width: 100%;
+    overflow-x: auto;
+
+    &-thead > tr,
+    &-tbody > tr {
+      > th,
+      > td {
+        white-space: pre;
+
+        > span {
+          display: block;
+        }
+      }
+    }
+  }
+}
+
+
+.ant-menu-item .anticon,
+.ant-menu-submenu-title .anticon {
+  /* 确保图标容器有正确的尺寸 */
+  width: 16px !important;
+  height: 16px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  
+  /* 修复 SVG 显示问题 */
+  svg {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 16px !important;
+    max-height: 16px !important;
+    object-fit: contain !important;
+    vertical-align: middle !important;
+    
+    /* 重置可能影响显示的属性 */
+    margin: 0 !important;
+    margin-right: 10px !important;
+    padding: 0 !important;
+    border: none !important;
+    
+    /* 确保 SVG 不被裁剪 */
+    overflow: visible !important;
+    
+    /* 继承颜色 */
+    fill: currentColor;
+    color: inherit;
+  }
+}
+
+
+/* 修复菜单选中状态颜色问题 */
+
+/* 一级菜单选中状态（Overview 等） */
+.ant-menu-item-selected .anticon svg,
+.ant-menu-item-selected .anticon {
+  fill: #1890ff !important;
+  color: #1890ff !important;
+}
+
+/* 有子菜单的父级菜单选中状态 */
+.ant-menu-submenu-selected > .ant-menu-submenu-title .anticon svg,
+.ant-menu-submenu-selected > .ant-menu-submenu-title .anticon,
+.ant-menu-submenu-open > .ant-menu-submenu-title .anticon svg,
+.ant-menu-submenu-open > .ant-menu-submenu-title .anticon {
+  fill: #1890ff !important;
+  color: #1890ff !important;
+}
+
+/* 子菜单项选中状态 */
+.ant-menu-submenu .ant-menu-item-selected .anticon svg,
+.ant-menu-submenu .ant-menu-item-selected .anticon {
+  fill: #1890ff !important;
+  color: #1890ff !important;
+}
+
+/* 暗色主题下的修复 */
+.ant-menu-dark {
+  /* 一级菜单选中状态 */
+  .ant-menu-item-selected .anticon svg,
+  .ant-menu-item-selected .anticon {
+    fill: #1890ff !important;
+    color: #1890ff !important;
+  }
+  
+  /* 父级菜单选中/打开状态 */
+  .ant-menu-submenu-selected > .ant-menu-submenu-title .anticon svg,
+  .ant-menu-submenu-selected > .ant-menu-submenu-title .anticon,
+  .ant-menu-submenu-open > .ant-menu-submenu-title .anticon svg,
+  .ant-menu-submenu-open > .ant-menu-submenu-title .anticon {
+    fill: #1890ff !important;
+    color: #1890ff !important;
+  }
+  
+  /* 未选中状态保持灰色 */
+  .ant-menu-item:not(.ant-menu-item-selected) .anticon svg,
+  .ant-menu-item:not(.ant-menu-item-selected) .anticon {
+    fill: rgba(255, 255, 255, 0.65) !important;
+    color: rgba(255, 255, 255, 0.65) !important;
+  }
+  
+  .ant-menu-submenu:not(.ant-menu-submenu-selected):not(.ant-menu-submenu-open) > .ant-menu-submenu-title .anticon svg,
+  .ant-menu-submenu:not(.ant-menu-submenu-selected):not(.ant-menu-submenu-open) > .ant-menu-submenu-title .anticon {
+    fill: rgba(255, 255, 255, 0.65) !important;
+    color: rgba(255, 255, 255, 0.65) !important;
+  }
+}
+
+/* 亮色主题下的修复 */
+.ant-menu-light {
+  /* 一级菜单选中状态 */
+  .ant-menu-item-selected .anticon svg,
+  .ant-menu-item-selected .anticon {
+    fill: #1890ff !important;
+    color: #1890ff !important;
+  }
+  
+  /* 父级菜单选中/打开状态 */
+  .ant-menu-submenu-selected > .ant-menu-submenu-title .anticon svg,
+  .ant-menu-submenu-selected > .ant-menu-submenu-title .anticon,
+  .ant-menu-submenu-open > .ant-menu-submenu-title .anticon svg,
+  .ant-menu-submenu-open > .ant-menu-submenu-title .anticon {
+    fill: #1890ff !important;
+    color: #1890ff !important;
+  }
+  
+  /* 未选中状态保持灰色 */
+  .ant-menu-item:not(.ant-menu-item-selected) .anticon svg,
+  .ant-menu-item:not(.ant-menu-item-selected) .anticon {
+    fill: rgba(0, 0, 0, 0.65) !important;
+    color: rgba(0, 0, 0, 0.65) !important;
+  }
+  
+  .ant-menu-submenu:not(.ant-menu-submenu-selected):not(.ant-menu-submenu-open) > .ant-menu-submenu-title .anticon svg,
+  .ant-menu-submenu:not(.ant-menu-submenu-selected):not(.ant-menu-submenu-open) > .ant-menu-submenu-title .anticon {
+    fill: rgba(0, 0, 0, 0.65) !important;
+    color: rgba(0, 0, 0, 0.65) !important;
+  }
+}
+
+/* 特别针对自定义 SVG 图标的修复 */
+.anticon svg[data-icon],
+.anticon svg {
+  transition: fill 0.3s ease, color 0.3s ease;
+}
+
+/* 确保 hover 状态也正确 */
+.ant-menu-item:hover .anticon svg,
+.ant-menu-item:hover .anticon,
+.ant-menu-submenu-title:hover .anticon svg,
+.ant-menu-submenu-title:hover .anticon {
+  fill: #1890ff !important;
+  color: #1890ff !important;
+}
+
+/* 覆盖选中状态的图标颜色 */
+.ant-menu-item-selected .anticon svg,
+.ant-menu-submenu-selected .anticon svg {
+  fill: #1890ff !important; /* 或者您的主题色 */
+}
+
+.ant-menu-item-selected .anticon svg path,
+.ant-menu-submenu-selected .anticon svg path {
+  fill: #1890ff !important;
+}
+
+// vue-country-intl 样式适配 Ant Design
+.nationality-selector {
+  // 主容器样式
+  .country-selector,
+  .country-intl {
+    width: 100%;
+
+    // 输入框容器
+    .selector, .country-selector__input-wrap, .input-wrap {
+      border: 1px solid #d9d9d9;
+      border-radius: 6px;
+      min-height: 40px;
+      background: #fff;
+      transition: all 0.3s;
+
+      &:hover {
+        border-color: #40a9ff;
+      }
+
+      &.focus, &:focus-within {
+        border-color: #40a9ff;
+        box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+      }
+    }
+
+    // 输入框
+    input {
+      border: none !important;
+      outline: none !important;
+      box-shadow: none !important;
+      height: 38px;
+      padding: 0 12px;
+      font-size: 14px;
+      color: #262626;
+
+      &::placeholder {
+        color: #bfbfbf;
+      }
+    }
+
+    // 清除按钮
+    .clear, .country-selector__clear {
+      color: #bfbfbf;
+      cursor: pointer;
+      margin-right: 8px;
+
+      &:hover {
+        color: #8c8c8c;
+      }
+    }
+
+    // 下拉箭头
+    .arrow, .country-selector__arrow {
+      color: #bfbfbf;
+      margin-right: 4px;
+    }
+
+    // 下拉菜单
+    .options, .country-selector__dropdown {
+      border: 1px solid #d9d9d9;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      background: #fff;
+      max-height: 256px;
+      overflow-y: auto;
+
+      // 选项
+      .option, .country-selector__item {
+        padding: 8px 12px;
+        font-size: 14px;
+        color: #262626;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+
+        &:hover {
+          background: #f5f5f5;
+        }
+
+        &.selected, &--selected {
+          background: #e6f7ff;
+          color: #1890ff;
+        }
+
+        // 国旗
+        .flag {
+          margin-right: 8px;
+          font-size: 16px;
+        }
+      }
+    }
+  }
+}
+
+/deep/ .ant-upload-list {
+          margin-top: 16px;
+          .anticon-paper-clip{
+            top:10px;
+          }
+          .ant-upload-list-item-card-actions{
+            top:10px;
+          }
+        }
