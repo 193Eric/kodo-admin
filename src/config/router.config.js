@@ -67,6 +67,34 @@ export const asyncRouterMap = [
         component: () => import('@/views/exchange/index'),
         meta: { title: 'Exchange', keepAlive: true, icon: Exchange }
       },
+            // Payouts
+      {
+        path: '/Payouts',
+        redirect: '/Payouts/recipient',
+        component: RouteView,
+        meta: { title: 'Payouts', icon: Payouts },
+        children: [
+          {
+            path: '/recipient',
+            name: 'Recipient Management',
+            meta: {
+              title: 'Recipient Management',
+              auth: true
+            },
+            component: () => import('@/views/payouts/recipient')
+          },
+          {
+            path: '/create',
+            name: ' Create Payout',
+            meta: {
+              title: 'Create Payout',
+              auth: true
+            },
+            component: () => import('@/views/payouts/create')
+          }
+
+        ]
+      },
 
       // Collections
       {
@@ -121,35 +149,6 @@ export const asyncRouterMap = [
             },
             component: () => import('@/views/power/security')
           }
-        ]
-      },
-
-      // Payouts
-      {
-        path: '/Payouts',
-        redirect: '/Payouts/recipient',
-        component: RouteView,
-        meta: { title: 'Payouts', icon: Payouts },
-        children: [
-          {
-            path: '/recipient',
-            name: 'Recipient Management',
-            meta: {
-              title: 'Recipient Management',
-              auth: true
-            },
-            component: () => import('@/views/payouts/recipient')
-          },
-          {
-            path: '/create',
-            name: ' Create Payout',
-            meta: {
-              title: 'Create Payout',
-              auth: true
-            },
-            component: () => import('@/views/payouts/create')
-          }
-
         ]
       }
     ]
