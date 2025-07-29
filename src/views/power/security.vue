@@ -549,27 +549,44 @@ export default {
 
   methods: {
     // 获取用户信息
-    async fetchUserInfo () {
-      try {
-        this.loading = true
-        const response = await request({
-          url: '/merchant/v2/info',
-          method: 'get'
-        })
+    // 获取用户信息
+async fetchUserInfo () {
+  try {
+    this.loading = true
+    const response = await request({
+      url: '/merchant/v2/info',
+      method: 'get'
+    })
 
-        if (response.code === 200) {
-          this.userInfo = response.data[0]
-          this.mapUserInfoToPage(response.data[0])
-        } else {
-          this.$message.error(response.message || 'Failed to load user information')
-        }
-      } catch (error) {
-        console.error('Failed to fetch user info:', error)
-        this.$message.error('Failed to load user information')
-      } finally {
-        this.loading = false
+    if (response.code === 200) {
+      // 找到主商户（有user字段的商户）
+      const mainMerchant = response.data.find(merchant =>
+        merchant.user !== null && merchant.user !== undefined
+      )
+
+      if (mainMerchant) {
+        this.userInfo = mainMerchant
+        this.mapUserInfoToPage(mainMerchant)
+      } else {
+        // 如果没有找到主商户，fallback到第0个或显示错误
+        // console.warn('No main merchant found, using first merchant as fallback')
+        // if (response.data && response.data.length > 0) {
+        //   this.userInfo = response.data[0]
+        //   this.mapUserInfoToPage(response.data[0])
+        // } else {
+        //   this.$message.error('No merchant information available')
+        // }
       }
-    },
+    } else {
+      this.$message.error(response.message || 'Failed to load user information')
+    }
+  } catch (error) {
+    console.error('Failed to fetch user info:', error)
+    this.$message.error('Failed to load user information')
+  } finally {
+    this.loading = false
+  }
+},
 
     // 将API数据映射到页面显示
     mapUserInfoToPage (data) {
@@ -589,7 +606,7 @@ export default {
       this.bindingSettings = {
         email: data.memail || data.user.email || '',
         phoneNumber: this.formatPhoneNumber(data.phone_code, data.phone),
-        googleAuthenticator: data.is_2fa_enabled === 1,
+        googleAuthenticator: data.user.is_2fa_enabled === 1,
         paymentPassword: data.is_set_password ? '******' : 'Not set'
       }
 
