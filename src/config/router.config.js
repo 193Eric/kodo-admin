@@ -135,7 +135,7 @@ export const asyncRouterMap = [
             path: '/recipient',
             name: 'Recipient Management',
             meta: {
-              title: 'Permission Management',
+              title: 'Recipient Management',
               auth: true
             },
             component: () => import('@/views/payouts/recipient')
