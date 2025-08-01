@@ -18,7 +18,8 @@
       </a-tab-pane>
 
       <a-tab-pane key="withdrawalFiat" tab="Withdrawal Fiat">
-        <WithdrawalFiat />
+        <!-- <WithdrawalFiat /> -->
+        <h2 style="margin-left: 20px;margin-top:10px; ">Coming soon</h2>
       </a-tab-pane>
 
       <a-tab-pane key="cryptoAddress" tab="Crypto Address">

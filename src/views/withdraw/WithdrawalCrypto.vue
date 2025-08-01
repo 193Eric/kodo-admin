@@ -455,8 +455,8 @@ export default {
       withdrawResult: null, // 提现结果
       // 币种图标映射
       coinIconMap: {
-        'USDT_TRC': require('@/assets/icons/usdt.png'),
-        'USDC_TRC': require('@/assets/icons/usdc.png'),
+        'USDT-TRC': require('@/assets/icons/usdt.png'),
+        'USDC-TRC': require('@/assets/icons/usdc.png'),
         'USDT': require('@/assets/icons/usdt.png'),
         'USDC': require('@/assets/icons/usdc.png')
       },
@@ -498,6 +498,12 @@ export default {
           estimatedTime: '10 minutes',
           networks: ['ERC-20', 'BSC']
         }
+      },
+      // URL参数
+      urlParams: {
+        coinId: '',
+        coinSymbol: '',
+        network: ''
       }
     }
   },
@@ -544,11 +550,17 @@ export default {
   },
 
   async created () {
+    // 获取URL参数
+    this.getUrlParams()
+
     // 页面创建时立即加载币种数据和地址列表
     await Promise.all([
       this.getCryptoAccounts(),
       this.getAddressList()
     ])
+
+    // 如果有URL参数，自动选中对应币种
+    this.autoSelectCoinFromUrl()
   },
 
   async mounted () {
@@ -561,6 +573,52 @@ export default {
   },
 
   methods: {
+    // 获取URL参数
+    getUrlParams () {
+      const query = this.$route.query
+      this.urlParams = {
+        coinId: query.coinId || '',
+        coinSymbol: query.coinSymbol || '',
+        network: query.network || ''
+      }
+      console.log('Withdraw page URL params:', this.urlParams)
+    },
+
+    // 根据URL参数自动选中币种
+    autoSelectCoinFromUrl () {
+      if (!this.urlParams.coinId || !this.availableCoins.length) {
+        return
+      }
+
+      // 查找匹配的币种
+      const targetCoin = this.availableCoins.find(coin =>
+        coin.id === this.urlParams.coinId
+      )
+
+      if (targetCoin) {
+        console.log('Auto selecting coin from URL:', targetCoin)
+        this.selectCoin(targetCoin)
+
+        // 自动选择网络（如果有）
+        this.$nextTick(() => {
+          const networks = this.getAvailableNetworks()
+          if (networks.length > 0) {
+            // 优先选择URL中指定的网络，否则选择第一个
+            const targetNetwork = networks.find(net =>
+              net === this.urlParams.network ||
+              net.includes(this.urlParams.network)
+            )
+            if (targetNetwork) {
+              this.selectedNetwork = targetNetwork
+            } else if (networks.length === 1) {
+              // 如果只有一个网络选项，自动选中
+              this.selectedNetwork = networks[0]
+            }
+          }
+        })
+      }
+    },
+
     // 获取地址列表
     async getAddressList () {
       this.addressListLoading = true
@@ -678,7 +736,7 @@ export default {
           })
 
           // 设置默认选中第一个币种
-          if (this.availableCoins.length > 0) {
+          if (this.availableCoins.length > 0 && !this.urlParams.coinId) {
             this.selectedCoin = this.availableCoins[0]
           }
 

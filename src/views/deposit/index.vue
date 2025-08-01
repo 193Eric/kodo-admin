@@ -22,8 +22,9 @@
 
             <!-- 法币充值 -->
             <a-tab-pane key="fiat" tab="Deposit Fiat">
-              <div class="deposit-fiat">
-                <!-- Step 1: Select Currency -->
+              <h2 style="margin-left: 20px;margin-top:10px; ">Coming soon</h2>
+              <div v-if="false" class="deposit-fiat">
+
                 <div class="step-item">
                   <div class="step-header">
                     <div class="step-number active">1</div>
@@ -52,17 +53,6 @@
                           </div>
                         </div>
                       </a-select-option>
-                      <!-- <a-select-option value="HKD">
-                        <div class="currency-option">
-                          <div class="currency-icon hkd">
-                            <img style="width:100%" src="@/assets/icons/hkd.png" />
-                          </div>
-                          <div class="currency-info">
-                            <div class="currency-name">HKD</div>
-                            <div class="currency-full-name">HongKong dollar</div>
-                          </div>
-                        </div>
-                      </a-select-option> -->
                       <a-select-option value="EUR">
                         <div class="currency-option">
                           <div class="currency-icon eur">

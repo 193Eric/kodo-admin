@@ -8,8 +8,9 @@
     <!-- Tab切换 -->
     <a-tabs v-model="activeTab" class="recipient-tabs">
       <a-tab-pane key="digitalCurrency" tab="Digital Currency Recipient">
+        <h2 style="margin-left: 20px;margin-top:10px; ">Coming soon</h2>
         <!-- 数字货币收款人页面 -->
-        <div class="tab-content">
+        <div v-if="false" class="tab-content">
           <!-- 搜索区域 -->
           <div class="search-section">
             <div class="search-filters">
@@ -94,7 +95,8 @@
 
       <a-tab-pane key="fiatCurrency" tab="Fiat Currency Recipient">
         <!-- 法币收款人页面 -->
-        <div class="tab-content">
+        <h2 style="margin-left: 20px;margin-top:10px; ">Coming soon</h2>
+        <div v-if="false" class="tab-content">
           <!-- 搜索区域 -->
           <div class="search-section">
             <div class="search-filters">

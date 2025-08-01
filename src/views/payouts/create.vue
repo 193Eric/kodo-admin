@@ -14,9 +14,10 @@
       <a-tab-pane key="digital" tab="Digital Payout" />
       <a-tab-pane key="fiat" tab="Fiat Payout" />
     </a-tabs>
+    <h2 style="margin-left: 20px;margin-top:10px; ">Coming soon</h2>
 
     <!-- 主要内容 -->
-    <div class="main-content">
+    <div v-if="false"class="main-content">
       <!-- 余额卡片 -->
       <div class="balance-card">
         <div class="balance-header">

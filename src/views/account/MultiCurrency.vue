@@ -14,56 +14,104 @@
       <a-tab-pane key="digital" tab="Digital Accounts">
         <!-- Digital Accounts 内容 -->
         <div class="account-display-area">
-          <div class="account-card" @mouseenter="showDigitalActions = true" @mouseleave="showDigitalActions = false">
-            <!-- 货币信息头部 -->
-            <div class="currency-header">
-              <div class="currency-info">
-                <div class="currency-icon">
-                  <span class="icon-text">T</span>
-                </div>
-                <span class="currency-name">USDT</span>
-              </div>
-              <div class="network-info">
-                <span class="network-label">TRC20</span>
-                <a-icon type="copy" class="copy-icon" />
-              </div>
-            </div>
+          <!-- 加载状态 -->
+          <div v-if="loading" class="loading-container">
+            <a-spin size="large" />
+          </div>
 
-            <!-- 余额显示 -->
-            <div class="balance-display">
-              <h1 class="balance-amount">12,345.67</h1>
-
-              <div class="balance-change-info">
-                <div class="change-left">
-                  <div class="received-amount">+1,280.98</div>
-                  <div class="received-label">Received today</div>
+          <!-- 账户卡片列表 -->
+          <div v-else-if="accountsData.length > 0" class="accounts-grid">
+            <div
+              v-for="account in accountsData"
+              :key="account.id"
+              class="account-card"
+              @mouseenter="setActiveCard(account.id)"
+              @mouseleave="setActiveCard(null)"
+            >
+              <!-- 货币信息头部 -->
+              <div class="currency-header">
+                <div class="currency-info">
+                  <div class="currency-icon">
+                    <img
+                      :src="getCoinIcon(account.crypto_currency_id)"
+                      :alt="getCoinName(account.crypto_currency_id)"
+                      @error="handleImageError"
+                    />
+                  </div>
+                  <span class="currency-name">{{ getCoinName(account.crypto_currency_id) }}</span>
                 </div>
-                <div class="change-right">
-                  <div class="percentage-change">
-                    <a-icon type="arrow-up" />
-                    <span>+0.2828%</span>
+                <div class="network-info">
+                  <span class="network-label">{{ getNetworkLabel(account.crypto_currency_id) }}</span>
+                </div>
+              </div>
+
+              <!-- 钱包地址 -->
+              <div class="wallet-address-section" v-if="account.wallet_address">
+                <div class="address-label">Wallet Address</div>
+                <div class="address-input-group">
+                  <div class="address-display">{{ formatAddress(account.wallet_address) }}</div>
+                  <a-button
+                    type="link"
+                    size="small"
+                    @click="copyAddress(account.wallet_address)"
+                    class="copy-address-btn"
+                  >
+                    <a-icon type="copy" />
+                  </a-button>
+                </div>
+              </div>
+
+              <!-- 余额显示 -->
+              <div class="balance-display">
+                <h1 class="balance-amount">{{ formatBalance(account.balance.available) }}</h1>
+
+                <div class="balance-change-info">
+                  <div class="change-left">
+                    <div class="received-amount">+{{ formatBalance(account.today_stats.deposit) }}</div>
+                    <div class="received-label">Received today</div>
+                  </div>
+                  <div class="change-right">
+                    <div class="percentage-change" :class="getPercentageClass(account)">
+                      <a-icon :type="getPercentageIcon(account)" />
+                      <span>{{ getPercentageChange(account) }}%</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <!-- 操作按钮 -->
-            <div class="action-buttons" v-if="showDigitalActions">
-              <a-button type="primary" size="small" icon="download">
-                Deposit
-              </a-button>
-              <a-button size="small" icon="upload" style="margin-left: 8px;">
-                Withdrawal
-              </a-button>
+              <!-- 操作按钮 -->
+              <div class="action-buttons" v-if="activeCardId === account.id">
+                <a-button
+                  type="primary"
+                  size="small"
+                  icon="download"
+                  @click="goToDeposit(account)"
+                >
+                  Deposit
+                </a-button>
+                <a-button
+                  size="small"
+                  icon="upload"
+                  style="margin-left: 8px;"
+                  @click="goToWithdraw(account)"
+                >
+                  Withdrawal
+                </a-button>
+              </div>
             </div>
+          </div>
+
+          <!-- 无数据状态 -->
+          <div v-else class="empty-state">
+            <a-empty description="No digital accounts found" />
           </div>
         </div>
       </a-tab-pane>
 
       <a-tab-pane key="virtual" tab="Virtual Account">
+        <h2 style="margin-left: 20px;margin-top:10px; ">Coming soon</h2>
         <!-- Virtual Account 内容 -->
-        <div class="account-display-area">
-          <!-- 没有账户时显示 -->
+        <div v-if="false" class="account-display-area">
           <div v-if="!hasVirtualAccount" class="virtual-welcome-banner">
             <div class="banner-content">
               <div class="banner-text">
@@ -312,6 +360,8 @@
 import ApplicationModal from './ApplicationModal.vue'
 import VirtualApplicationModal from './VirtualApplicationModal.vue'
 import InstitutionApplicationModal from './InstitutionApplicationModal.vue'
+import { request } from '@/api/_service'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'MultiCurrencyAccount',
@@ -323,17 +373,35 @@ export default {
   data () {
     return {
       activeTab: 'digital',
-      showDigitalActions: false,
+      activeCardId: null, // 当前鼠标悬停的卡片ID
       showVirtualActions: false,
       showInstitutionActions: false,
       showApplicationModal: false,
       showVirtualApplicationModal: false,
       showInstitutionApplicationModal: false,
       hasVirtualAccount: true, // 控制Virtual Account是否显示已有账户
-      hasInstitutionAccount: true // 控制Institution Account是否显示已有账户
+      hasInstitutionAccount: true, // 控制Institution Account是否显示已有账户
+
+      // 新增的数据
+      loading: false,
+      accountsData: [], // 账户数据
+
+      // 币种图标映射
+      coinIconMap: {
+        'USDT-TRC': require('@/assets/icons/usdt.png'),
+        'USDC-TRC': require('@/assets/icons/usdc.png'),
+        'USDT_TRC': require('@/assets/icons/usdt.png'),
+        'USDC_TRC': require('@/assets/icons/usdc.png'),
+        'USDT': require('@/assets/icons/usdt.png'),
+        'USDC': require('@/assets/icons/usdc.png'),
+        'BTC': require('@/assets/icons/btc.png')
+      }
     }
   },
   computed: {
+    ...mapGetters([
+      'getMainMerchant'
+    ]),
     currentTabTitle () {
       switch (this.activeTab) {
         case 'digital':
@@ -350,12 +418,138 @@ export default {
   watch: {
     activeTab () {
       // 切换标签时重置所有操作按钮状态
-      this.showDigitalActions = false
+      this.activeCardId = null
       this.showVirtualActions = false
       this.showInstitutionActions = false
     }
   },
+  async mounted () {
+    // 页面加载时获取账户信息
+    await this.fetchAccountsInfo()
+  },
   methods: {
+    // 获取账户信息
+    async fetchAccountsInfo () {
+      this.loading = true
+      try {
+        const response = await request({
+          url: `/merchant/crypto/v2/accounts?type=1&merchant_id=${localStorage.getItem('currentMerchantId')}`,
+          method: 'GET'
+        })
+
+        if (response.code === 200 && response.data) {
+          this.accountsData = response.data
+          console.log('Accounts info loaded:', this.accountsData)
+        } else {
+          console.error('Failed to load accounts info:', response.message)
+          this.$message.error(response.message || 'Failed to load accounts info')
+        }
+      } catch (error) {
+        console.error('Failed to fetch accounts info:', error)
+        this.$message.error('Failed to fetch accounts info')
+      } finally {
+        this.loading = false
+      }
+    },
+
+    // 设置当前激活的卡片
+    setActiveCard (cardId) {
+      this.activeCardId = cardId
+    },
+
+    // 获取币种图标
+    getCoinIcon (cryptoCurrencyId) {
+      // 先尝试完整匹配
+      if (this.coinIconMap[cryptoCurrencyId]) {
+        return this.coinIconMap[cryptoCurrencyId]
+      }
+
+      // 再尝试基础符号匹配
+      const baseSymbol = this.getCoinName(cryptoCurrencyId)
+      if (this.coinIconMap[baseSymbol]) {
+        return this.coinIconMap[baseSymbol]
+      }
+
+      // 默认返回USDT图标
+      return this.coinIconMap['USDT']
+    },
+
+    // 获取币种名称
+    getCoinName (cryptoCurrencyId) {
+      if (!cryptoCurrencyId) return ''
+      // 提取币种名称，比如 USDT_TRC -> USDT
+      return cryptoCurrencyId.split('_')[0]
+    },
+
+    // 获取网络标签
+    getNetworkLabel (cryptoCurrencyId) {
+      if (cryptoCurrencyId.includes('TRC')) {
+        return 'TRC20'
+      } else if (cryptoCurrencyId.includes('ERC')) {
+        return 'ERC20'
+      } else if (cryptoCurrencyId.includes('BSC')) {
+        return 'BSC'
+      }
+      return 'MAIN'
+    },
+
+    // 格式化余额显示
+    formatBalance (balance) {
+      if (!balance) return '0.00'
+      const num = parseFloat(balance)
+      return num.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })
+    },
+
+    // 计算百分比变化
+    getPercentageChange (account) {
+      const available = parseFloat(account.balance.available) || 0
+      const todayDeposit = parseFloat(account.today_stats.deposit) || 0
+
+      if (available === 0) return '0.00'
+
+      const percentage = (todayDeposit / available) * 100
+      return Math.abs(percentage).toFixed(4)
+    },
+
+    // 获取百分比变化的样式类
+    getPercentageClass (account) {
+      const todayDeposit = parseFloat(account.today_stats.deposit) || 0
+      return todayDeposit >= 0 ? 'positive' : 'negative'
+    },
+
+    // 获取百分比变化的图标
+    getPercentageIcon (account) {
+      const todayDeposit = parseFloat(account.today_stats.deposit) || 0
+      return todayDeposit >= 0 ? 'arrow-up' : 'arrow-down'
+    },
+
+    // 格式化地址显示（显示前6位和后4位）
+    formatAddress (address) {
+      if (!address) return ''
+      if (address.length <= 10) return address
+      return `${address.slice(0, 6)}...${address.slice(-4)}`
+    },
+
+    // 复制地址
+    copyAddress (address) {
+      if (address) {
+        navigator.clipboard.writeText(address).then(() => {
+          this.$message.success('Address copied to clipboard')
+        }).catch(() => {
+          this.$message.error('Failed to copy address')
+        })
+      }
+    },
+
+    // 图片加载失败处理
+    handleImageError (event) {
+      // 图片加载失败时，使用默认的USDT图标
+      event.target.src = this.coinIconMap['USDT']
+    },
+
     handleApplyClick () {
       if (this.activeTab === 'digital') {
         this.showApplicationModal = true
@@ -364,6 +558,30 @@ export default {
       } else if (this.activeTab === 'institution') {
         this.showInstitutionApplicationModal = true
       }
+    },
+
+    // 跳转到充值页面
+    goToDeposit (account) {
+      this.$router.push({
+        path: '/deposit',
+        query: {
+          coinId: account.crypto_currency_id,
+          coinSymbol: this.getCoinName(account.crypto_currency_id),
+          network: this.getNetworkLabel(account.crypto_currency_id)
+        }
+      })
+    },
+
+    // 跳转到提现页面
+    goToWithdraw (account) {
+      this.$router.push({
+        path: '/withdraw',
+        query: {
+          coinId: account.crypto_currency_id,
+          coinSymbol: this.getCoinName(account.crypto_currency_id),
+          network: this.getNetworkLabel(account.crypto_currency_id)
+        }
+      })
     }
   }
 }
@@ -435,12 +653,26 @@ export default {
     padding-top: 32px;
   }
 
+  // 加载状态
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+  }
+
+  // 账户网格布局
+  .accounts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+  }
+
   // Digital Account 卡片样式
   .account-card {
     background: linear-gradient(135deg, #e6f7ff 0%, #f0f8ff 100%);
     border-radius: 8px;
     padding: 24px;
-    width: 320px;
     position: relative;
     transition: all 0.3s ease;
 
@@ -453,7 +685,7 @@ export default {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
 
       .currency-info {
         display: flex;
@@ -462,17 +694,17 @@ export default {
         .currency-icon {
           width: 32px;
           height: 32px;
-          background: #26a67a;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
           margin-right: 8px;
+          overflow: hidden;
 
-          .icon-text {
-            color: white;
-            font-weight: bold;
-            font-size: 16px;
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
           }
         }
 
@@ -490,12 +722,47 @@ export default {
         font-size: 12px;
 
         .network-label {
-          margin-right: 4px;
+          background: #f0f0f0;
+          padding: 2px 8px;
+          border-radius: 4px;
+          font-size: 11px;
+          font-weight: 500;
+        }
+      }
+    }
+
+    // 钱包地址部分
+    .wallet-address-section {
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+
+      .address-label {
+        font-size: 12px;
+        color: #8c8c8c;
+        margin-bottom: 4px;
+      }
+
+      .address-input-group {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .address-display {
+          font-family: monospace;
+          font-size: 13px;
+          color: #262626;
+          background: rgba(255, 255, 255, 0.3);
+          padding: 4px 8px;
+          border-radius: 4px;
+          flex: 1;
+          margin-right: 8px;
         }
 
-        .copy-icon {
-          cursor: pointer;
-          font-size: 12px;
+        .copy-address-btn {
+          padding: 4px 8px;
+          height: auto;
+          min-width: auto;
 
           &:hover {
             color: #11253E;
@@ -505,6 +772,8 @@ export default {
     }
 
     .balance-display {
+      margin-bottom: 16px;
+
       .balance-amount {
         font-size: 28px;
         font-weight: 600;
@@ -534,10 +803,17 @@ export default {
 
         .change-right {
           .percentage-change {
-            color: #52c41a;
             font-size: 12px;
             display: flex;
             align-items: center;
+
+            &.positive {
+              color: #52c41a;
+            }
+
+            &.negative {
+              color: #ff4d4f;
+            }
 
             .anticon {
               margin-right: 2px;
@@ -569,6 +845,14 @@ export default {
         }
       }
     }
+  }
+
+  // 空状态样式
+  .empty-state {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
   }
 
   // Virtual Account 欢迎横幅样式
@@ -1096,10 +1380,8 @@ export default {
       gap: 8px;
     }
 
-    .account-card,
-    .virtual-account-card,
-    .institution-account-card {
-      width: 100%;
+    .accounts-grid {
+      grid-template-columns: 1fr;
     }
 
     .virtual-welcome-banner .banner-content {

@@ -121,28 +121,28 @@
             <a-icon type="more" class="more-icon" />
           </div>
           <div class="quick-grid">
-            <div class="quick-item">
+            <div class="quick-item" @click="$router.push('/exchange')">
               <div class="quick-icon ">
                 <img style="width:100%" src="@/assets/icons/exchange.png" />
               </div>
               <h4>Exchange</h4>
               <p>Supports multiple scenarios, platforms, and currencies.</p>
             </div>
-            <div class="quick-item">
+            <div class="quick-item" @click="$router.push('/deposit')">
               <div class="quick-icon ">
                 <img style="width:100%" src="@/assets/icons/topup.png" />
               </div>
               <h4>Top-up</h4>
               <p>Supports multiple scenarios, platforms, and currencies.</p>
             </div>
-            <div class="quick-item">
+            <div class="quick-item" @click="$router.push('/withdraw')">
               <div class="quick-icon ">
                 <img style="width:100%" src="@/assets/icons/withdrawal.png" />
               </div>
               <h4>Withdrawal</h4>
               <p>Supports multiple scenarios, platforms, and currencies.</p>
             </div>
-            <div class="quick-item">
+            <div class="quick-item" @click="$router.push('/create')" >
               <div class="quick-icon ">
                 <img style="width:100%" src="@/assets/icons/payouts.png" />
               </div>

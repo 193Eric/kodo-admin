@@ -231,8 +231,8 @@ export default {
       networkOptions: [], // 网络选项
       // 币种图标映射
       coinIconMap: {
-        'USDT_TRC': require('@/assets/icons/usdt.png'),
-        'USDC_TRC': require('@/assets/icons/usdc.png'),
+        'USDT-TRC': require('@/assets/icons/usdt.png'),
+        'USDC-TRC': require('@/assets/icons/usdc.png'),
         'USDT': require('@/assets/icons/usdt.png'),
         'USDC': require('@/assets/icons/usdc.png')
       },

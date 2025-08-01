@@ -96,33 +96,33 @@ export const asyncRouterMap = [
         ]
       },
 
-      // Collections
-      {
-        path: '/collections',
-        redirect: '/collections/payeeManagement',
-        component: RouteView,
-        meta: { title: 'Collections', icon: Collections },
-        children: [
-          {
-            path: '/payeeManagement',
-            name: 'PayeeManagement',
-            meta: {
-              title: 'Payee Management',
-              auth: true
-            },
-            component: () => import('@/views/collections/payeeManagement')
-          },
-          {
-            path: '/cryptoCollections',
-            name: 'cryptoCollections',
-            meta: {
-              title: 'Crypto Collections',
-              auth: true
-            },
-            component: () => import('@/views/collections/cryptoCollections')
-          }
-        ]
-      },
+      // // Collections
+      // {
+      //   path: '/collections',
+      //   redirect: '/collections/payeeManagement',
+      //   component: RouteView,
+      //   meta: { title: 'Collections', icon: Collections },
+      //   children: [
+      //     {
+      //       path: '/payeeManagement',
+      //       name: 'PayeeManagement',
+      //       meta: {
+      //         title: 'Payee Management',
+      //         auth: true
+      //       },
+      //       component: () => import('@/views/collections/payeeManagement')
+      //     },
+      //     {
+      //       path: '/cryptoCollections',
+      //       name: 'cryptoCollections',
+      //       meta: {
+      //         title: 'Crypto Collections',
+      //         auth: true
+      //       },
+      //       component: () => import('@/views/collections/cryptoCollections')
+      //     }
+      //   ]
+      // },
 
       // settings
       {
@@ -131,15 +131,15 @@ export const asyncRouterMap = [
         component: RouteView,
         meta: { title: 'Settings', icon: Settings },
         children: [
-          {
-            path: '/power',
-            name: 'Power',
-            meta: {
-              title: 'Permission Management',
-              auth: true
-            },
-            component: () => import('@/views/power/index')
-          },
+          // {
+          //   path: '/power',
+          //   name: 'Power',
+          //   meta: {
+          //     title: 'Permission Management',
+          //     auth: true
+          //   },
+          //   component: () => import('@/views/power/index')
+          // },
           {
             path: '/security',
             name: 'Security',

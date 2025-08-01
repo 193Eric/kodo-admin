@@ -160,8 +160,8 @@ export default {
       },
       // 币种图标映射 - 参考第二个页面的方式
       coinIconMap: {
-        'USDT_TRC': require('@/assets/icons/usdt.png'),
-        'USDC_TRC': require('@/assets/icons/usdc.png'),
+        'USDT-TRC': require('@/assets/icons/usdt.png'),
+        'USDC-TRC': require('@/assets/icons/usdc.png'),
         'USDT': require('@/assets/icons/usdt.png'),
         'USDC': require('@/assets/icons/usdc.png'),
         'BTC': require('@/assets/icons/btc.png')
@@ -177,6 +177,12 @@ export default {
         'BTC': 'Bitcoin',
         'ETH': 'Ethereum',
         'TRX': 'Tron'
+      },
+      // URL参数
+      urlParams: {
+        coinId: '',
+        coinSymbol: '',
+        network: ''
       }
     }
   },
@@ -189,10 +195,64 @@ export default {
     }
   },
   async mounted () {
+    // 获取URL参数
+    this.getUrlParams()
+
     // 页面加载时获取账户信息
     await this.fetchAccountsInfo()
+
+    // 如果有URL参数，自动选中对应币种
+    this.autoSelectCoinFromUrl()
   },
   methods: {
+    // 获取URL参数
+    getUrlParams () {
+      const query = this.$route.query
+      this.urlParams = {
+        coinId: query.coinId || '',
+        coinSymbol: query.coinSymbol || '',
+        network: query.network || ''
+      }
+      console.log('Deposit page URL params:', this.urlParams)
+    },
+
+    // 根据URL参数自动选中币种
+    autoSelectCoinFromUrl () {
+      if (!this.urlParams.coinId || !this.accountsData.length) {
+        return
+      }
+
+      // 查找匹配的账户
+      const targetAccount = this.accountsData.find(account =>
+        account.crypto_currency_id === this.urlParams.coinId
+      )
+
+      if (targetAccount) {
+        console.log('Auto selecting coin from URL:', targetAccount.crypto_currency_id)
+        this.crypto.selectedCoin = targetAccount.crypto_currency_id
+
+        // 自动选择网络（如果有）
+        this.$nextTick(() => {
+          const networks = this.availableNetworks
+          if (networks.length > 0) {
+            // 优先选择URL中指定的网络，否则选择第一个
+            const targetNetwork = networks.find(net =>
+              net.label === this.urlParams.network ||
+              net.value.includes(this.urlParams.network)
+            )
+            if (targetNetwork) {
+              this.crypto.selectedNetwork = targetNetwork.value
+              this.handleNetworkChange(targetNetwork.value)
+            } else if (networks.length === 1) {
+              // 如果只有一个网络选项，自动选中
+              this.crypto.selectedNetwork = networks[0].value
+              this.handleNetworkChange(networks[0].value)
+            }
+          }
+        })
+      }
+    },
+
     // 获取账户信息
     async fetchAccountsInfo () {
       try {
@@ -207,6 +267,9 @@ export default {
 
           // 动态生成网络选项
           this.generateNetworkOptions()
+
+          // 账户数据加载完成后，尝试自动选中币种
+          this.autoSelectCoinFromUrl()
         } else {
           console.error('Failed to load accounts info:', response.message)
         }
@@ -238,6 +301,7 @@ export default {
 
     // 获取币种图标 - 参考第二个页面的实现
     getCoinIcon (cryptoCurrencyId) {
+      console.log(cryptoCurrencyId, 123123)
       // 先尝试完整匹配
       if (this.coinIconMap[cryptoCurrencyId]) {
         return this.coinIconMap[cryptoCurrencyId]
@@ -313,7 +377,7 @@ export default {
           url: '/merchant/crypto/v2/deposit/create',
           method: 'POST',
           data: {
-            gateway_currency_id: this.crypto.selectedNetwork,
+            gateway_currency_id: selectedAccount.gateway_currency_id,
             account_id: accountId,
             merchant_id: merchantId
           }
