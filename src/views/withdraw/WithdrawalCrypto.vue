@@ -828,7 +828,7 @@ export default {
         if (this.selectedCoin.chainCode) {
           return [this.selectedCoin.chainCode]
         }
-
+        
         // 如果没有链代码，从配置中获取
         const coinId = this.selectedCoin.id || this.selectedCoin.symbol
         const config = this.coinConfigs[coinId] || this.coinConfigs[this.selectedCoin.symbol]

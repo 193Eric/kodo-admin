@@ -286,8 +286,41 @@
       </div>
     </div>
 
+    <!-- Business Verification -->
+    <div class="verification-section" v-if="isMasterPending">
+      <div class="verification-content">
+        <div class="verification-icon">
+          <img style="width:100%" src="@/assets/icons/Introduction.png" />
+        </div>
+        <div class="verification-text">
+          <h3>Business Verification</h3>
+          <p>Complete merchant verification, manage funds more easily, and accelerate business development.</p>
+        </div>
+        <button
+          class="verify-btn" @click="()=>{
+            this.$router.push('/kyb/index?is_sub=0')
+          }">Verify now</button>
+      </div>
+    </div>
+
+    <div class="verification-section" v-if="isReject">
+      <div class="verification-content">
+        <div class="verification-icon">
+          <img style="width:100%" src="@/assets/icons/Introduction.png" />
+        </div>
+        <div class="verification-text">
+          <h3>KYB Application Rejected</h3>
+          <p>reject reason：<span style="color:red">{{ this.currentMerchant.reject_reason }}</span></p>
+        </div>
+        <button
+          class="verify-btn" @click="()=>{
+            this.$router.push(`/kyb/index?is_sub=${this.currentMerchant.user ? '0' :'1'}&id=${this.currentMerchant.kyb_id}`)
+          }">reapply</button>
+      </div>
+    </div>
+
     <!-- 底部两栏：To Do List 和 Financial Calendar（全宽度） -->
-    <div class="bottom-full-section">
+    <div v-if="false" class="bottom-full-section">
       <!-- To Do List -->
       <div class="todo-section">
         <h3 class="section-title">To Do List</h3>
@@ -326,8 +359,8 @@
               <img style="width:100%" src="@/assets/icons/Introduction.png" />
             </div>
             <div class="verification-text">
-              <h3>Business Verification</h3>
-              <p>Complete merchant verification, manage funds more easily, and accelerate business development.</p>
+              <h3>KYB Application Rejected</h3>
+              <p>reject reason：<span style="color:red">{{ this.currentMerchant. reject_reason }}</span></p>
             </div>
             <button
               class="verify-btn" @click="()=>{
@@ -405,6 +438,13 @@ export default {
 
       // 如果是主商户(有user字段) 且 kyb_status为0，则显示验证提示
       return this.currentMerchant.user && this.currentMerchant.kyb_status === 0
+    },
+    isReject () {
+      if (!this.currentMerchant) {
+        return false
+      }
+
+      return this.currentMerchant.kyb_status && this.currentMerchant.kyb_status === -1
     }
   },
 

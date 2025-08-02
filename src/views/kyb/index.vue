@@ -163,6 +163,7 @@ import BasicInformationStep from './steps/BasicInformationStep.vue'
 import ProofStep from './steps/ProofStep.vue'
 import UBOStep from './steps/UBOStep.vue'
 import { mapGetters } from 'vuex'
+
 export default {
   name: 'BusinessVerification',
   components: {
@@ -172,10 +173,18 @@ export default {
     UBOStep
   },
 
-  mounted () {
-    // 页面加载时检查是否有草稿
-    this.loadDraft()
+  async mounted () {
+    // 检查是否有ID参数，如果有则获取并回填数据
+    const kybId = this.$route.query.id
+    console.log(this.$route.query.id, 123123)
+    if (kybId) {
+      await this.loadKYBData(kybId)
+    } else {
+      // 页面加载时检查是否有草稿
+      this.loadDraft()
+    }
   },
+
   computed: {
     ...mapGetters([
       'getMainMerchant'
@@ -244,6 +253,184 @@ export default {
   },
 
   methods: {
+    /**
+     * 从接口加载KYB数据并回填
+     */
+    async loadKYBData (kybId) {
+      try {
+        this.$message.loading('Loading data...', 0)
+
+        const response = await request({
+          url: `/merchant/kyb/${kybId}`,
+          method: 'get'
+        })
+
+        this.$message.destroy()
+
+        if (response.code === 200 && response.data) {
+          await this.fillFormWithKYBData(response.data)
+          this.$message.success('Data loaded successfully!')
+
+          // 如果当前在首页，跳转到第一步开始编辑
+          if (this.currentStep === 'home') {
+            this.currentStep = 'country'
+          }
+        } else {
+          throw new Error(response.message || 'Failed to load data')
+        }
+      } catch (error) {
+        this.$message.destroy()
+        console.error('Load KYB data error:', error)
+        this.$message.error(`Failed to load data: ${error.message}`)
+
+        // 加载失败时加载草稿作为备选
+        this.loadDraft()
+      }
+    },
+
+    /**
+     * 将接口返回的KYB数据填充到表单中
+     */
+    async fillFormWithKYBData (data) {
+      try {
+        // 创建新的formData对象
+        const newFormData = { ...this.formData }
+
+        // 基础信息映射
+        if (data.country_code) newFormData.country_code = data.country_code
+        if (data.company_name) newFormData.company_name = data.company_name
+        if (data.registration_number) newFormData.registration_number = data.registration_number
+        if (data.registered_address) newFormData.registered_address = data.registered_address
+        if (data.business_scope) newFormData.business_scope = data.business_scope
+        if (data.website) newFormData.website = data.website
+
+        // 处理日期字段
+        if (data.registration_date) {
+          newFormData.registration_date = moment(data.registration_date)
+        }
+
+        // 处理长期有效性和证书有效期
+        if (data.is_long_term !== undefined) {
+          newFormData.is_long_term = data.is_long_term
+        }
+        if (data.certificate_effective_date) {
+          newFormData.certificate_effective_date = data.certificate_effective_date
+        }
+
+        // UBO信息映射
+        if (data.beneficiary_name) newFormData.beneficiary_name = data.beneficiary_name
+        if (data.beneficiary_surname) newFormData.beneficiary_surname = data.beneficiary_surname
+        if (data.nationality) newFormData.nationality = data.nationality
+        if (data.legal_person_id_type) newFormData.legal_person_id_type = data.legal_person_id_type.toString()
+
+        // 处理文件字段 - 将JSON字符串转换为数组
+        const fileFields = [
+          'cr_certificate_url',
+          'br_certificate_url',
+          'annual_return_url',
+          'company_constitution_url',
+          'company_registr_certificate',
+          'proof_of_equity_structure',
+          'other_files',
+          'id_no'
+        ]
+
+        fileFields.forEach(fieldName => {
+          const fieldData = data[fieldName]
+          if (fieldData) {
+            try {
+              // 尝试解析JSON字符串
+              if (typeof fieldData === 'string') {
+                const parsedData = JSON.parse(fieldData)
+                if (Array.isArray(parsedData)) {
+                  newFormData[fieldName] = parsedData.filter(url => url && typeof url === 'string')
+                } else {
+                  newFormData[fieldName] = []
+                }
+              } else if (Array.isArray(fieldData)) {
+                newFormData[fieldName] = fieldData.filter(url => url && typeof url === 'string')
+              } else {
+                newFormData[fieldName] = []
+              }
+            } catch (parseError) {
+              console.warn(`Failed to parse ${fieldName}:`, parseError)
+              newFormData[fieldName] = []
+            }
+          } else {
+            newFormData[fieldName] = []
+          }
+        })
+
+        // 设置merchant_id
+        if (data.merchant_id) {
+          newFormData.merchant_id = data.merchant_id
+        }
+
+        // 更新formData - 这里使用直接赋值而不是合并，确保完全替换
+        this.formData = newFormData
+
+        // 根据数据完整性标记已完成的步骤
+        this.markCompletedStepsFromData(newFormData)
+
+        // 增加版本号以触发子组件更新
+        this.formDataVersion++
+
+        // 延迟一下确保子组件能收到更新
+        await this.$nextTick()
+
+        console.log('KYB data filled successfully:', newFormData)
+      } catch (error) {
+        console.error('Fill form data error:', error)
+        throw new Error('Failed to process data')
+      }
+    },
+
+    /**
+     * 根据数据完整性标记已完成的步骤
+     */
+    markCompletedStepsFromData (formData) {
+      this.completedSteps = []
+
+      // 检查国家步骤
+      if (formData.country_code) {
+        this.completedSteps.push('country')
+      }
+
+      // 检查基础信息步骤
+      if (formData.company_name && formData.registration_number &&
+          formData.registration_date && formData.registered_address &&
+          formData.business_scope && formData.website) {
+        this.completedSteps.push('basic')
+      }
+
+      // 检查文件上传步骤
+      const requiredFileFields = [
+        'cr_certificate_url',
+        'br_certificate_url',
+        'annual_return_url',
+        'company_constitution_url',
+        'company_registr_certificate',
+        'proof_of_equity_structure'
+      ]
+
+      const hasAllRequiredFiles = requiredFileFields.every(field =>
+        formData[field] && Array.isArray(formData[field]) && formData[field].length > 0
+      )
+
+      if (hasAllRequiredFiles) {
+        this.completedSteps.push('proof')
+      }
+
+      // 检查UBO步骤
+      if (formData.beneficiary_name && formData.beneficiary_surname &&
+          formData.nationality && formData.legal_person_id_type &&
+          formData.id_no && Array.isArray(formData.id_no) && formData.id_no.length > 0) {
+        this.completedSteps.push('ubo')
+      }
+
+      console.log('Completed steps marked:', this.completedSteps)
+    },
+
     startVerification () {
       this.currentStep = 'country'
     },
@@ -372,6 +559,12 @@ export default {
     },
 
     loadDraft () {
+      // 如果URL中有ID参数，不加载草稿
+      const kybId = this.$route.query.id
+      if (kybId) {
+        return
+      }
+
       try {
         const savedDraft = localStorage.getItem('businessVerificationDraft')
         if (savedDraft) {
@@ -520,7 +713,10 @@ export default {
           this.$message.success('Business Verification submitted successfully!')
 
           console.log('Final form data:', submitData)
-          this.$router.push('/overview')
+          setTimeout(() => {
+            this.$router.push('/overview')
+            window.location.reload()
+          }, 1000)
         } else {
           throw new Error(response.message || 'Submission failed')
         }
